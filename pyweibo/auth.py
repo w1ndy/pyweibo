@@ -63,10 +63,12 @@ class WeiboAuthenticator:
         result = re.search(r'retcode=(\d+?)', r.text)
         if not result:
             raise WeiboAuthenticationError('cannot find retcode')
-        retcode = result.group(1)
-        if int(retcode) == 0:
+        retcode = int(result.group(1))
+        if retcode == 0:
+            result = re.search(r'replace\([\'"](.+)[\'"]\)', r.text).group(1)
+            self._session.get(result)
             return
-        elif int(retcode) == 4:
+        elif retcode == 4:
             raise WeiboAuthenticationError( \
                 'captcha required', 4, \
                 WEIBO_CAPTCHA_IMAGE_URL.format(\

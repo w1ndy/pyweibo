@@ -16,6 +16,7 @@ except:
 
 from .constants import *
 from .auth import WeiboAuthenticator, WeiboAuthenticationError
+from .place import WeiboPlace
 
 class SinaWeibo:
     def __init__(self):
@@ -37,3 +38,6 @@ class SinaWeibo:
             else:
                 raise
         return None
+
+    def getPlaceById(self, id):
+        return WeiboPlace(self._session, id)
