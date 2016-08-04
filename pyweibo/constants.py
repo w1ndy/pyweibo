@@ -6,4 +6,6 @@ WEIBO_LOGIN_CALLBACK_URL = 'http://weibo.com/ajaxlogin.php?framelogin=1&callback
 
 WEIBO_LOGIN_URL = 'http://login.sina.com.cn/sso/login.php?client=ssologin.js(v1.4.18)'
 
+WEIBO_CAPTCHA_IMAGE_URL = 'http://login.sina.com.cn/cgi/pin.php?r={rand}&s=0&p={pcid}'
+
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36'

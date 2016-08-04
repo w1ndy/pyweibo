@@ -6,20 +6,32 @@ import binascii
 import codecs
 import re
 
+from random import randrange
 from .constants import *
+
+class WeiboAuthenticationError(Exception):
+    def __init__(self, reason, retcode=-1, captcha_url=''):
+        super(WeiboAuthenticationError, self).__init__(reason)
+        self.retcode = retcode
+        self.captcha_url = captcha_url
 
 class WeiboAuthenticator:
     def __init__(self, session):
         self._session = session
+        self._fetchPrelogin()
+
+    def _fetchPrelogin(self):
         try:
-            r = self._session.get(WEIBO_PRELOGIN_URL, \
-                    headers={'User-Agent': USER_AGENT})
+            r = self._session.get(WEIBO_PRELOGIN_URL)
             self._prelogin = json.loads(r.text)
         except e:
-            raise RuntimeError('unable to parse prelogin data!')
+            raise WeiboAuthenticationError('unable to parse prelogin data!')
 
-    def auth(self, username, password):
+    def auth(self, username, password, captcha):
         data = {}
+        if captcha:
+            data['pcid'] = self._prelogin['pcid']
+            data['door'] = captcha
         data['entry'] = 'weibo'
         data['gateway'] = 1
         data['from'] = ''
@@ -47,16 +59,25 @@ class WeiboAuthenticator:
         try:
             r = self._session.post(WEIBO_LOGIN_URL, data=data)
         except Exception as e:
-            raise RuntimeError('login failed: ' + str(e))
+            raise WeiboAuthenticationError('login failed: ' + str(e))
         result = re.search(r'retcode=(\d+?)', r.text)
         if not result:
-            raise RuntimeError('cannot find retcode')
+            raise WeiboAuthenticationError('cannot find retcode')
         retcode = result.group(1)
-        if int(retcode) != 0:
+        if int(retcode) == 0:
+            return
+        elif int(retcode) == 4:
+            raise WeiboAuthenticationError( \
+                'captcha required', 4, \
+                WEIBO_CAPTCHA_IMAGE_URL.format(\
+                    rand=randrange(0, 1e8), \
+                    pcid=self._prelogin['pcid']))
+        else:
             result = re.search(r'reason=(.+)[&\'"]', r.text)
             if not result:
-                raise RuntimeError('login request failed with ' + str(retcode))
+                raise WeiboAuthenticationError( \
+                    'login request failed', retcode)
             else:
-                raise RuntimeError('login request failed with ' + \
-                    str(retcode) + ': ' + \
-                    requests.utils.unquote(result.group(1), encoding='gbk'))
+                raise WeiboAuthenticationError( \
+                    requests.utils.unquote(result.group(1), encoding='gbk'), \
+                    retcode)

@@ -6,4 +6,8 @@ with open('config.json', 'r') as f:
     config = json.loads(f.read())
     cred = config['credentials']
     w = SinaWeibo()
-    w.login(cred['username'], cred['password'])
+    captcha_img = w.login(cred['username'], cred['password'])
+    if captcha_img:
+        captcha_img.show()
+        captcha = input('Captcha Code: ')
+        w.login(cred['username'], cred['password'], captcha)
