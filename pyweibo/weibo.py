@@ -1,4 +1,3 @@
-import requests
 import json
 import rsa
 import base64
@@ -17,12 +16,12 @@ except:
 from .constants import *
 from .auth import WeiboAuthenticator, WeiboAuthenticationError
 from .place import WeiboPlace
+from .http import HTTPSession
 
 class SinaWeibo:
     def __init__(self):
         self._signed_in = False
-        self._session = requests.Session()
-        self._session.headers.update({'User-Agent': USER_AGENT})
+        self._session = HTTPSession()
         self._auth = WeiboAuthenticator(self._session)
 
     def login(self, username, password, captcha=None):
@@ -38,6 +37,9 @@ class SinaWeibo:
             else:
                 raise
         return None
+
+    def getSession(self):
+        return self._session
 
     def getPlaceById(self, id):
         return WeiboPlace(self._session, id)
