@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from .constants import *
 from .regex import *
 from .fmview import FMViewParser
+from .tools import parseChineseNumeric
 
 class WeiboPlace(FMViewParser):
     def __init__(self, session, place_id):
@@ -17,6 +18,9 @@ class WeiboPlace(FMViewParser):
         result = RE_PLACE_NAME.search(str(self.page))
         self.name = result.group(1)
 
+        if not 'Pl_Core_Pt6Rank__28' in self.views:
+            print(self.page.prettify)
+            raise RuntimeError('cannot find corresponding nearby view')
         nearby_html = self.views['Pl_Core_Pt6Rank__28']['html']
         soup = BeautifulSoup(nearby_html, 'html.parser')
         locations = soup.find_all('a', { 'href': RE_PLACE_URL })
@@ -26,8 +30,10 @@ class WeiboPlace(FMViewParser):
             locdata['id'] = RE_PLACE_URL.match(l['href']).group(1)
             locdata['url'] = 'http://weibo.com/p/' + locdata['id']
             locdata['name'] = l.text
-            locdata['weibo_count'] = int(soup.find('a', \
-                { 'href': 'http://weibo.com/p/' + locdata['id'] + '#feedtop' }).text)
+            locdata['weibo_count'] = parseChineseNumeric( \
+                soup.find('a', { \
+                    'href': 'http://weibo.com/p/' + locdata['id'] + '#feedtop' \
+                }).text)
             self.nearby.append(locdata)
 
         map_html = self.views['Pl_Core_P5Map__21']['html']

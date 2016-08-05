@@ -1,8 +1,9 @@
 import config
 
 from pyweibo import SinaWeibo
+from contrib import convertImageToString
 
-def doInteractiveLogin():
+def doInteractiveLogin(challengeMe=False):
     c = config.ExampleConfig('../config.json')
 
     w = SinaWeibo()
@@ -12,7 +13,8 @@ def doInteractiveLogin():
 
     captcha_img = w.login(c.cred['username'], c.cred['password'])
     if captcha_img:
-        captcha_img.show()
+        if challengeMe: print(convertImageToString(captcha_img))
+        else: captcha_img.show()
         captcha = input('Captcha Code: ')
         w.login(c.cred['username'], c.cred['password'], captcha)
 

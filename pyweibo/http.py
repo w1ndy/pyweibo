@@ -1,5 +1,6 @@
 import requests
 import time
+import re
 
 _UnixSignalSupport = True
 try:
@@ -8,7 +9,7 @@ except:
     _UnixSignalSupport = False
     print('no signal support on this platform, timeout will be disabled.')
 
-from .constants import USER_AGENT
+from .constants import USER_AGENT, WEIBO_REJECTED_ERROR
 
 class HTTPSession:
     def __init__(self):
@@ -17,6 +18,7 @@ class HTTPSession:
         self._request_min_interval = 0
         self._max_retries = 3
         self._request_timeout = 15
+        self._wait_after_rejection = 3
         self._last_request_timestamp = time.clock()
 
     def _doThrottle(self):
@@ -25,7 +27,7 @@ class HTTPSession:
             print('warning: throttling request, sleep %f sec' % dt)
             time.sleep(dt)
 
-    def _tryUntilSucceed(self, func):
+    def _tryUntilSucceed(self, func, validate=None):
         left_retries = self._max_retries
         result = None
         while left_retries > 0:
@@ -37,6 +39,8 @@ class HTTPSession:
                     signal.signal(signal.SIGALRM, sighandler)
                     signal.alarm(self._request_timeout)
                 result = func()
+                if validate and not validate(result):
+                    raise RuntimeError('HTTPSession: validation error')
                 if _UnixSignalSupport:
                     signal.alarm(0)
                 break
@@ -53,13 +57,22 @@ class HTTPSession:
                     raise
         return result
 
+    def _validateHttpResponse(self, r):
+        if r.status_code >= 400:
+            return False
+        if re.search(WEIBO_REJECTED_ERROR, r.text):
+            print('rejected by server, waiting...')
+            time.sleep(self._wait_after_rejection)
+            return False
+        return True
+
     def get(self, *kargs, **kwargs):
         def _delegatedGet():
             r = self._session.get(*kargs, **kwargs)
             self._last_request_timestamp = time.clock()
             return r
         self._doThrottle()
-        return self._tryUntilSucceed(_delegatedGet)
+        return self._tryUntilSucceed(_delegatedGet, self._validateHttpResponse)
 
     def post(self, *kargs, **kwargs):
         def _delegatedPost():
@@ -67,7 +80,7 @@ class HTTPSession:
             self._last_request_timestamp = time.clock()
             return r
         self._doThrottle()
-        return self._tryUntilSucceed(_delegatedPost)
+        return self._tryUntilSucceed(_delegatedPost, self._validateHttpResponse)
 
     def setThrottle(self, sec):
         self._request_min_interval = sec

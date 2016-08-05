@@ -24,8 +24,8 @@ class WeiboAuthenticator:
         try:
             r = self._session.get(WEIBO_PRELOGIN_URL)
             self._prelogin = json.loads(r.text)
-        except e:
-            raise WeiboAuthenticationError('unable to parse prelogin data!')
+        except:
+            raise
 
     def auth(self, username, password, captcha):
         data = {}

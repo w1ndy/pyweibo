@@ -18,6 +18,7 @@ def main():
     while queue and len(places) < max_place_count:
         nx = queue.popleft()
         pid = nx['id']
+        print('processing location: ' + pid)
         places[pid] = w.getPlaceById(pid)
         for p in places[pid].nearby:
             if p['id'] in processed: continue
@@ -40,6 +41,7 @@ def main():
             'name': nx['name']
         })
 
+    print('total %d locations found' % len(places))
     with open(output_filename, 'w') as f:
         f.write(json.dumps({
             'proc': processed,
