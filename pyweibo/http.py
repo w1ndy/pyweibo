@@ -21,7 +21,7 @@ class HTTPSession:
 
     def _doThrottle(self):
         dt = time.clock() - self._last_request_timestamp
-        if dt < self._request_min_interval:
+        if dt > 0.001 and dt < self._request_min_interval:
             print('warning: throttling request, sleep %f sec' % dt)
             time.sleep(dt)
 
@@ -69,8 +69,11 @@ class HTTPSession:
         self._doThrottle()
         return self._tryUntilSucceed(_delegatedPost)
 
-    def setThrottle(sec):
+    def setThrottle(self, sec):
         self._request_min_interval = sec
 
-    def setRequestTimeout(sec):
+    def setRequestTimeout(self, sec):
         self._request_timeout = sec
+
+    def setMaxRetries(self, times):
+        self._max_retries = times

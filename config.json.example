@@ -2,5 +2,10 @@
     "credentials": {
         "username": "USERNAME",
         "password": "PASSWORD"
+    },
+    "http": {
+        "max_retries": 4,
+        "request_interval": 0.3,
+        "timeout": 15
     }
 }
