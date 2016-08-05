@@ -10,4 +10,6 @@ WEIBO_CAPTCHA_IMAGE_URL = 'http://login.sina.com.cn/cgi/pin.php?r={rand}&s=0&p={
 
 WEIBO_PLACE_URL = 'http://weibo.com/p/{id}/home'
 
+WEIBO_MAP_URL = 'http://place.weibo.com/index.php?_p=place_page&_a=poi_map_right&poiid={id}'
+
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36'

@@ -3,6 +3,11 @@
         "username": "USERNAME",
         "password": "PASSWORD"
     },
+    "location_explorer": {
+        "max_place_count": 3,
+        "output_filename": "<path to file>",
+        "origin": "<some location id>"
+    },
     "http": {
         "max_retries": 4,
         "request_interval": 0.3,
