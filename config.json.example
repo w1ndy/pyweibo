@@ -4,8 +4,11 @@
         "password": "PASSWORD"
     },
     "location_explorer": {
-        "max_place_count": 3,
-        "output_filename": "<path to file>",
+        "max_place_count": 3,                   // optional
+        "archive_size": 500,                    // optional
+        "search_radius": 100,                   // optional
+        "search_center": [<lat>, <lng>],        // optional
+        "output_filename": "<path to file>.{0}.json",
         "origin": "<some location id>"
     },
     "http": {

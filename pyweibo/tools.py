@@ -1,3 +1,14 @@
+_UnixSignalSupport = True
+def _retryTimeoutSignalHandler(signum, frame):
+    raise RuntimeError('timed out')
+
+try:
+    import signal
+    signal.signal(signal.SIGALRM, _retryTimeoutSignalHandler)
+except:
+    _UnixSignalSupport = False
+    print('no signal support on this platform, timeout will be disabled.')
+
 NUMERIC_MAP = {
     '\u5341': 10,
     '\u767e': 100,
@@ -15,3 +26,33 @@ def parseChineseNumeric(s):
         else:
             return base * float(s)
     return base
+
+
+def retryUntil(func, validator=None, retry_func=None, max_retries=3, \
+        timeout=15, wait=0):
+    left_retries = max_retries
+    result = None
+    while left_retries > 0:
+        left_retries -= 1
+        try:
+            if _UnixSignalSupport:
+                signal.alarm(timeout)
+            result = func()
+            if _UnixSignalSupport:
+                signal.alarm(0)
+            if validator and not validator(result):
+                raise RuntimeError('validation error')
+            break
+        except Exception as e:
+            if _UnixSignalSupport:
+                signal.alarm(0)
+            if left_retries:
+                print('[%d/%d] Exception: %s' % ( \
+                    max_retries - left_retries, \
+                    max_retries, \
+                    str(e)))
+                if retry_func: retry_func()
+                if wait: time.sleep(wait)
+            else:
+                raise
+    return result
