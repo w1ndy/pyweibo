@@ -1,3 +1,5 @@
+import time
+
 _UnixSignalSupport = True
 def _retryTimeoutSignalHandler(signum, frame):
     raise RuntimeError('timed out')
