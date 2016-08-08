@@ -10,9 +10,9 @@ class HTTPSession:
         self._session = requests.Session()
         self._session.headers.update({ 'User-Agent': USER_AGENT })
         self._request_min_interval = 0
-        self._max_retries = 3
+        self._max_retries = 5
         self._request_timeout = 15
-        self._wait_after_rejection = 3
+        self._wait_after_rejection = 5
         self._last_request_timestamp = time.clock()
 
     def _doThrottle(self):
@@ -26,15 +26,13 @@ class HTTPSession:
             validator=validator, \
             max_retries=self._max_retries, \
             timeout=self._request_timeout, \
-            wait=self._request_min_interval)
+            wait=self._wait_after_rejection)
 
     def _validateHttpResponse(self, r):
         if r.status_code >= 400:
             return False
         if re.search('(%s)|(%s)' % \
                 (WEIBO_REJECTED_ERROR, WEIBO_NOTFOUND_ERROR), r.text):
-            print('rejected by server, waiting...')
-            time.sleep(self._wait_after_rejection)
             return False
         return True
 

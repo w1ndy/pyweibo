@@ -54,7 +54,7 @@ def retryUntil(func, validator=None, retry_func=None, max_retries=3, \
                     max_retries, \
                     str(e)))
                 if retry_func: retry_func()
-                if wait: time.sleep(wait)
+                if wait: time.sleep((max_retries - left_retries) * wait)
             else:
                 raise
     return result

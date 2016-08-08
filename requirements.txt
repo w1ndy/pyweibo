@@ -1,0 +1,6 @@
+requests
+beautifulsoup4
+geopy
+rsa
+pillow
+numpy

@@ -90,10 +90,6 @@ class WeiboPlace(FMViewParser):
         return nearby
 
     def _retrieveLocation(self):
-        if not 'html' in self.views['Pl_Core_P5Map__21']:
-            self._writeLog(self.views['Pl_Core_P5Map__21'])
-            raise RuntimeError()
-
         def _readPoiId():
             map_html = self.views['Pl_Core_P5Map__21']['html']
             result = RE_PLACE_POIID.search(map_html)

@@ -40,8 +40,7 @@ class WeiboAuthenticator:
         data['pagerefer'] = WEIBO_LOGIN_REFERRER
         data['vsnf'] = 1
         data['su'] = codecs.decode( \
-            base64.encodebytes(codecs.encode(username)), \
-            encoding='ascii').strip()
+            base64.encodebytes(codecs.encode(username)), 'ascii').strip()
         data['service'] = 'miniblog'
         data['servertime'] = self._prelogin['servertime']
         data['nonce'] = self._prelogin['nonce']
